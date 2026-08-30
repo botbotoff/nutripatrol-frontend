@@ -102,7 +102,7 @@ export default function FlagForm({ type_ }: FlagFormProps) {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            axios.post(`${import.meta.env.VITE_API_URL}/flags`, formData)
+            axios.post(`${import.meta.env.VITE_API_URL}/flags`, formData, { withCredentials: true })
             .then(() => {
                 trackEvent("Flag", "submit_flag", formData.barcode);
                 window.location.replace('/thanks');

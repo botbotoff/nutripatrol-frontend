@@ -38,7 +38,7 @@ export default function ImageModerationPage() {
         const url = `${import.meta.env.VITE_API_URL}/tickets?type_=product&status=open&page=${currentPage}&page_size=8`
         const fetchTickets = async () => {
             try {
-                const response = await axios.get(url);
+                const response = await axios.get(url, { withCredentials: true });
                 const ticketsData = response.data.tickets;
                 setTickets(ticketsData);
                 setMaxPage(response.data.max_page);
@@ -46,7 +46,7 @@ export default function ImageModerationPage() {
                 const ticketIds = ticketsData.map((ticket: any) => ticket.id);
                 const flagsResponse = await axios.post(`${import.meta.env.VITE_API_URL}/flags/batch`, {
                     ticket_ids: ticketIds
-                });
+                }, { withCredentials: true });
 
                 // update ticket by adding reasons from flags
                 const ticketIdToFlags = flagsResponse.data.ticket_id_to_flags;

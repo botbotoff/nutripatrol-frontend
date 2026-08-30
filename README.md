@@ -25,6 +25,19 @@ Please check this one before running the frontend.
 
 ## Get started 🎯
 
+### Prerequisites
+
+The backend must be running first, otherwise every page that lists tickets stays empty
+and the browser console fills with failed requests. Follow the instructions in
+[nutripatrol](https://github.com/openfoodfacts/nutripatrol) — including the
+`make migrate-db` step and the `AUTH_SERVER_STATIC` variable, both of which are required
+for a local API to answer anything.
+
+By default `.env.local` points at `http://localhost:8000/api/v1`, which is where the
+backend's nginx container listens.
+
+### Install
+
 1. You can clone this repository :
 
 ` git clone https://github.com/openfoodfacts/nutripatrol-frontend.git `
@@ -33,15 +46,34 @@ Please check this one before running the frontend.
 
 ` cd nutripatrol-frontend `
 
-3. Install dependencies : 
+3. Install dependencies :
 
-` npm install `
+` yarn install `
 
-4. Start vite : 
+4. Start vite :
 
-` npm run dev `
+` yarn dev `
 
 5. Congratulations 🎉 ! [You can open frontend](http://localhost:5173/)
+
+> [!NOTE]
+> This project uses yarn — `yarn.lock` is the committed lockfile and there is no
+> `package-lock.json`. Installing with npm resolves a different dependency tree.
+
+### Logging in locally
+
+`.env.local` ships with `VITE_DEVELOPPEMENT_MODE = "development"`, which makes the app
+treat you as a logged-in moderator so you can reach `/moderation` and
+`/image-moderation`. This only bypasses the *frontend* gate — the API still authenticates
+every request. To get past it, either:
+
+- paste an Open Food Facts session cookie into the backend's
+  `/api/v1/set_session_cookie` endpoint (form available at
+  <http://localhost:8000/api/docs>), making sure `VITE_PO_URL` here and
+  `AUTH_SERVER_STATIC` / `OFF_TLD` on the backend all point at the same environment
+  (`.org` or `.net`, not a mix); or
+- query the API directly with the Robotoff bearer token from the backend's `.env`, which
+  skips authentication entirely.
 
 ## Useful routes
 

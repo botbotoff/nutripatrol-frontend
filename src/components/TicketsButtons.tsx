@@ -19,7 +19,7 @@ export default function BasicButtonGroup({id, barcode, setTickets, tickets}: Bas
     // Change status of ticket to archived
     function handleStatus(id: number, status: string) {
         try {
-            axios.put(`${import.meta.env.VITE_API_URL}/tickets/${id}/status?status=${status}`)
+            axios.put(`${import.meta.env.VITE_API_URL}/tickets/${id}/status?status=${status}`, null, { withCredentials: true })
             // remove ticket from tickets
             const updatedTickets = tickets.filter((ticket: any) => ticket.id !== id);
             setTickets(updatedTickets);

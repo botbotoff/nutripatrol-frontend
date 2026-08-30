@@ -32,7 +32,7 @@ export default function ImageModerationPage() {
     const isMobile = useMediaQuery('(max-width:800px)')
 
     const fetchImageTickets = (url_: string) => {
-        axios.get(url_).then(async (res) => {         
+        axios.get(url_, { withCredentials: true }).then(async (res) => {         
             
             const ticketsData = res.data.tickets;
 
@@ -42,7 +42,7 @@ export default function ImageModerationPage() {
             const ticketIds = ticketsData.map((ticket: any) => ticket.id);
             const flagsResponse = await axios.post(`${import.meta.env.VITE_API_URL}/flags/batch`, {
                 ticket_ids: ticketIds
-            });
+            }, { withCredentials: true });
             // update ticket by adding reasons from flags
             const ticketIdToFlags = flagsResponse.data.ticket_id_to_flags;
             const updatedTickets = ticketsData.map((ticket: any) => {
