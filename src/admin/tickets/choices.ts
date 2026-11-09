@@ -19,6 +19,8 @@ export const statusChoices = [
 export const actionTypeChoices = [
   ...statusChoices,
   { id: "comment", name: "Comment" },
+  { id: "issue_linked", name: "Issue linked" },
+  { id: "issue_unlinked", name: "Issue unlinked" },
 ];
 
 /** The label of an action type, or the raw value for one this UI predates. */

@@ -64,13 +64,37 @@ export interface TicketComment {
   created_at: string;
 }
 
+/**
+ * A GitHub issue of openfoodfacts/openfoodfacts-server linked to a ticket.
+ *
+ * `title`, `state` and `state_reason` are what GitHub said at `checked_at`:
+ * null when GitHub could not be reached yet.
+ */
+export interface TicketIssue {
+  id: number;
+  ticket_id: number;
+  number: number;
+  url: string;
+  title: string | null;
+  state: "open" | "closed" | null;
+  /** Why a closed issue was closed: `completed`, `not_planned`, `duplicate`. */
+  state_reason: string | null;
+  checked_at: string | null;
+  /** The moderator who linked it. */
+  user_id: string;
+  created_at: string;
+  /** Set once the issue is unlinked; history entries still point at it. */
+  removed_at: string | null;
+}
+
 /** The two statuses a ticket can be closed with, with or without a comment. */
 export type ClosedStatus = "closed-no-issue" | "closed-fixed";
 
 export interface ModeratorAction {
   id: number;
   /**
-   * The ticket status the action set, or `comment` - see actionTypeChoices.
+   * The ticket status the action set, `comment`, `issue_linked` or
+   * `issue_unlinked` - see actionTypeChoices.
    */
   action_type: string;
   user_id: string;
@@ -78,6 +102,8 @@ export interface ModeratorAction {
   created_at: string;
   /** The comment, on a `comment` action. */
   comment?: TicketComment | null;
+  /** The GitHub issue, on `issue_linked` and `issue_unlinked` actions. */
+  issue?: TicketIssue | null;
 }
 
 /**
@@ -144,6 +170,8 @@ interface Ticket {
   created_at: string;
   /** How many comments moderators wrote on the ticket. */
   comment_count?: number;
+  /** The GitHub issues linked to the ticket, as their state was last checked. */
+  issues?: TicketIssue[];
 }
 
 // Built as a concretely-typed provider rather than the generic RecordType
@@ -303,6 +331,37 @@ export const dataProvider = {
         { withCredentials: true },
       ),
     ),
+
+  /**
+   * The GitHub issues linked to a ticket. The API refreshes their state from
+   * GitHub when it is more than 15 minutes old.
+   */
+  getTicketIssues: async (ticketId: Identifier) => {
+    const data = await request<{ issues?: TicketIssue[] }>(
+      axios.get(`${apiUrl}/tickets/${ticketId}/issues`, {
+        withCredentials: true,
+      }),
+    );
+    return data.issues ?? [];
+  },
+
+  /** Link an openfoodfacts-server issue to a ticket, by its URL. */
+  linkTicketIssue: async (ticketId: Identifier, url: string) =>
+    request<TicketIssue>(
+      axios.post(
+        `${apiUrl}/tickets/${ticketId}/issues`,
+        { url },
+        { withCredentials: true },
+      ),
+    ),
+
+  /** Unlink an issue from a ticket. The issue stays as it is on GitHub. */
+  unlinkTicketIssue: async (ticketId: Identifier, issueId: number) =>
+    request<TicketIssue>(
+      axios.delete(`${apiUrl}/tickets/${ticketId}/issues/${issueId}`, {
+        withCredentials: true,
+      }),
+    ),
 } as NutriPatrolDataProvider;
 
 /**
@@ -329,4 +388,10 @@ export type NutriPatrolDataProvider = DataProvider & {
     status: ClosedStatus,
     comment: string,
   ) => Promise<Ticket>;
+  getTicketIssues: (ticketId: Identifier) => Promise<TicketIssue[]>;
+  linkTicketIssue: (ticketId: Identifier, url: string) => Promise<TicketIssue>;
+  unlinkTicketIssue: (
+    ticketId: Identifier,
+    issueId: number,
+  ) => Promise<TicketIssue>;
 };

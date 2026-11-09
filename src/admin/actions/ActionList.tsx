@@ -9,6 +9,7 @@ import {
 } from "react-admin";
 import { actionTypeChoices } from "../tickets/choices";
 import type { ModeratorAction } from "../dataProvider";
+import { IssueLink } from "../tickets/TicketIssues";
 
 // GET /moderator_actions/me is scoped to the caller and always ordered
 // created_at desc server-side, and takes no filter or sort parameter - so
@@ -38,10 +39,12 @@ export function ActionList() {
           choices={actionTypeChoices}
           sortable={false}
         />
+        {/* The comment, or the GitHub issue linked or unlinked. */}
         <FunctionField<ModeratorAction>
-          label="Comment"
+          label="Details"
           sortable={false}
           render={(action) => {
+            if (action.issue) return <IssueLink issue={action.issue} />;
             const text = action.comment?.text ?? "";
             return text.length > 120 ? `${text.slice(0, 120)}…` : text;
           }}

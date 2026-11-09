@@ -21,6 +21,7 @@ import { TicketFlagsField } from "./TicketFlagsField";
 import { TicketThumbnailField } from "./TicketThumbnailField";
 import { TicketActionsField } from "./TicketActionsField";
 import { TicketCommentCountField } from "./TicketCommentCountField";
+import { TicketIssuesField } from "./TicketIssues";
 import { ProductImagesManagerPanel } from "./ProductImagesManager";
 
 // `reason` is a flag field, not a ticket one: the API filters tickets on the
@@ -80,6 +81,8 @@ export function TicketDatagrid({
         label="Comments"
         sortable={false}
       />
+      {/* As last checked: the ticket page refreshes them from GitHub. */}
+      <TicketIssuesField source="issues" label="Issues" sortable={false} />
       {/* The way to the full ticket, now that the row itself is inert. */}
       <ShowButton label="Details" />
       {/* Contributors cannot moderate, so the column would only hold an

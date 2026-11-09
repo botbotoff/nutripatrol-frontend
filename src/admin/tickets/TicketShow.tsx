@@ -24,7 +24,7 @@ import {
   useRecordContext,
 } from "react-admin";
 import type { Identifier } from "react-admin";
-import type { NutriPatrolDataProvider } from "../dataProvider";
+import type { NutriPatrolDataProvider, TicketIssue } from "../dataProvider";
 import {
   actionTypeLabel,
   flavorChoices,
@@ -36,6 +36,7 @@ import { useFlagsByTicketIds } from "./flags";
 import { productUrl, userUrl } from "./flavorUrls";
 import { ProductImagesManager } from "./ProductImagesManager";
 import { TicketActionsField } from "./TicketActionsField";
+import { IssueLink, TicketIssuesSection } from "./TicketIssues";
 import { TicketThumbnailField } from "./TicketThumbnailField";
 
 interface Ticket {
@@ -46,6 +47,7 @@ interface Ticket {
   flavor: string;
   url: string | null;
   created_at: string;
+  issues?: TicketIssue[];
 }
 
 /** A titled block, so the three parts of the page read as three parts. */
@@ -151,6 +153,23 @@ function TicketFlags() {
           ))}
         </Stack>
       )}
+    </Section>
+  );
+}
+
+/**
+ * The GitHub issues opened about the ticket. Moderators always get the
+ * section, to open or link one; reporters only when there is one to follow.
+ */
+function TicketGitHubIssues() {
+  const record = useRecordContext<Ticket>();
+  const { permissions } = usePermissions();
+  if (!record) return null;
+  if (permissions !== "moderator" && !record.issues?.length) return null;
+
+  return (
+    <Section title="GitHub issues">
+      <TicketIssuesSection />
     </Section>
   );
 }
@@ -283,6 +302,11 @@ function TicketHistory() {
                   {new Date(action.created_at).toLocaleString()}
                 </Typography>
               </Stack>
+              {action.issue && (
+                <Typography variant="body2">
+                  <IssueLink issue={action.issue} />
+                </Typography>
+              )}
               {action.comment && (
                 <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
                   {action.comment.text}
@@ -322,6 +346,7 @@ export function TicketShow() {
       <Stack spacing={2} sx={{ p: 2 }}>
         <TicketSummary />
         <TicketFlags />
+        <TicketGitHubIssues />
         <TicketProductImages />
         <TicketHistory />
       </Stack>
